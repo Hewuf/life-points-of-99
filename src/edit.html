@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>编辑年度记录</title>
+  <link rel="preconnect" href="https://fonts.font.im" crossorigin>
+  <link href="https://fonts.font.im/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: oklch(10% 0.012 60);
+      --surface: oklch(14% 0.012 60);
+      --border: oklch(22% 0.01 60);
+      --border-focus: oklch(76% 0.14 82 / 0.5);
+      --text-primary: oklch(88% 0.01 80);
+      --text-secondary: oklch(55% 0.01 80);
+      --text-muted: oklch(35% 0.01 60);
+      --accent: oklch(76% 0.14 82);
+      --accent-dim: oklch(76% 0.14 82 / 0.15);
+      --danger: oklch(65% 0.18 25);
+      --success: oklch(70% 0.14 150);
+    }
+
+    html.light {
+      --bg: oklch(97% 0.008 80);
+      --surface: oklch(92% 0.008 80);
+      --border: oklch(82% 0.008 70);
+      --border-focus: oklch(52% 0.14 82 / 0.5);
+      --text-primary: oklch(18% 0.01 60);
+      --text-secondary: oklch(40% 0.01 60);
+      --text-muted: oklch(60% 0.008 70);
+      --accent: oklch(52% 0.14 82);
+      --accent-dim: oklch(52% 0.14 82 / 0.1);
+      --danger: oklch(50% 0.18 25);
+      --success: oklch(50% 0.14 150);
+    }
+
+    html, body { transition: background 0.35s, color 0.35s; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Noto Serif SC', serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Lock screen ── */
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      gap: 20px;
+    }
+    .lock-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .lock-dot-row {
+      display: flex;
+      gap: 14px;
+    }
+    .lock-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .lock-dot.filled {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .lock-dot.error {
+      background: var(--danger);
+      border-color: var(--danger);
+      animation: shake 0.3s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .lock-numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .lock-key {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-primary);
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.35s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lock-key:hover { background: var(--surface); border-color: var(--text-muted); }
+    .lock-key:active { background: var(--border); }
+    .lock-screen { transition: background 0.35s; }
+    .lock-key.del {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .lock-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    /* ── Main editor (hidden until unlocked) ── */
+    .editor-wrap { display: none; }
+    .editor-wrap.unlocked { display: block; }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky;
+      top: 0; z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .back-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--text-primary); }
+
+    .topbar-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    .mode-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .mode-btn:hover { color: var(--text-secondary); border-color: var(--text-muted); }
+
+    /* Year selector */
+    .year-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .year-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 300;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      letter-spacing: 0.05em;
+    }
+    .year-select:focus { border-color: var(--border-focus); }
+
+    /* Save button */
+    .save-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      padding: 7px 20px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .save-btn:hover { opacity: 0.85; }
+    .save-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Editor body ── */
+    .editor-body {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 32px 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    /* Field group */
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .field-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .field-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: -2px;
+    }
+
+    input[type="text"],
+    textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 15px;
+      font-weight: 300;
+      padding: 12px 16px;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      line-height: 1.7;
+      resize: vertical;
+    }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--border-focus);
+    }
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+    textarea.main-content {
+      min-height: 260px;
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    /* ── Highlights editor ── */
+    .highlights-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .highlight-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .highlight-bullet {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .highlight-row input {
+      flex: 1;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px 6px;
+      border-radius: 3px;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+    .remove-btn:hover { color: var(--danger); background: oklch(65% 0.18 25 / 0.1); }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      padding: 9px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      width: 100%;
+      justify-content: center;
+    }
+    .add-btn:hover { border-color: var(--text-muted); color: var(--text-secondary); }
+
+    /* ── Images ── */
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    .img-thumb {
+      aspect-ratio: 4/3;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .img-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .img-remove {
+      position: absolute;
+      top: 6px; right: 6px;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: white;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .img-thumb:hover .img-remove { opacity: 1; }
+
+    .img-add-area {
+      aspect-ratio: 4/3;
+      border-radius: 4px;
+      border: 1px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      gap: 6px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .img-add-area:hover { border-color: var(--text-muted); background: var(--surface); }
+    .img-add-icon {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    .img-add-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* URL input for images */
+    .url-input-row {
+      display: none;
+      gap: 8px;
+      align-items: center;
+    }
+    .url-input-row.active { display: flex; }
+    .url-input-row input {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+    }
+    .url-confirm-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.2s;
+    }
+    .url-confirm-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      padding: 10px 24px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.success { border-color: var(--success); color: var(--success); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .editor-body { padding: 32px 16px 100px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Lock screen -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-title">管理员验证</div>
+  <div class="lock-dot-row" id="lock-dots">
+    <div class="lock-dot"></div>
+    <div class="lock-dot"></div>
+    <div class="lock-dot"></div>
+    <div class="lock-dot"></div>
+  </div>
+  <div class="lock-numpad" id="numpad">
+    <button class="lock-key" data-n="1">1</button>
+    <button class="lock-key" data-n="2">2</button>
+    <button class="lock-key" data-n="3">3</button>
+    <button class="lock-key" data-n="4">4</button>
+    <button class="lock-key" data-n="5">5</button>
+    <button class="lock-key" data-n="6">6</button>
+    <button class="lock-key" data-n="7">7</button>
+    <button class="lock-key" data-n="8">8</button>
+    <button class="lock-key" data-n="9">9</button>
+    <div></div>
+    <button class="lock-key" data-n="0">0</button>
+    <button class="lock-key del" data-n="del">⌫</button>
+  </div>
+  <div class="lock-hint">默认密码：1998</div>
+</div>
+
+<!-- Editor -->
+<div class="editor-wrap" id="editor-wrap">
+  <nav class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-btn">← 返回</a>
+      <span class="topbar-title">年度记录编辑</span>
+    </div>
+    <div class="year-selector">
+      <select class="year-select" id="year-select"></select>
+    </div>
+    <button class="mode-btn" id="mode-btn" title="切换主题">◑</button>
+    <button class="save-btn" id="save-btn">保存</button>
+  </nav>
+
+  <div class="editor-body">
+    <!-- Snippet -->
+    <div class="field-group">
+      <div class="field-label">一句话总结</div>
+      <div class="field-hint">hover 时显示，简短有力</div>
+      <input type="text" id="field-snippet" placeholder="这一年用一句话来说…" maxlength="40">
+    </div>
+
+    <!-- Main content -->
+    <div class="field-group">
+      <div class="field-label">年度记录</div>
+      <div class="field-hint">自由书写，支持换行</div>
+      <textarea class="main-content" id="field-text" placeholder="写下这一年发生的事，你的感受，你的改变…"></textarea>
+    </div>
+
+    <!-- Highlights -->
+    <div class="field-group">
+      <div class="field-label">这一年的关键词 / 事件</div>
+      <div class="field-hint">每条一句话，最多 8 条</div>
+      <div class="highlights-list" id="highlights-list"></div>
+      <button class="add-btn" id="add-highlight-btn">＋ 添加一条</button>
+    </div>
+
+    <!-- Images -->
+    <div class="field-group">
+      <div class="field-label">照片</div>
+      <div class="field-hint">粘贴图片 URL，最多 4 张</div>
+      <div class="url-input-row" id="url-input-row">
+        <input type="text" id="img-url-input" placeholder="https://...">
+        <button class="url-confirm-btn" id="url-confirm-btn">确认添加</button>
+        <button class="url-confirm-btn" id="url-cancel-btn">取消</button>
+      </div>
+      <div class="images-grid" id="images-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const BIRTH_YEAR = 1998;
+  const CURRENT_YEAR = new Date().getFullYear();
+  const PIN = '1998'; // changeable
+
+  let pinInput = '';
+  let currentYear = CURRENT_YEAR;
+  let highlights = [];
+  let images = [];
+
+  // ── Lock screen ──
+  function checkUnlocked() {
+    return sessionStorage.getItem('editor_unlocked') === '1';
+  }
+
+  if (checkUnlocked()) {
+    unlock();
+  }
+
+  document.getElementById('numpad').addEventListener('click', e => {
+    const key = e.target.closest('[data-n]');
+    if (!key) return;
+    const n = key.dataset.n;
+
+    if (n === 'del') {
+      pinInput = pinInput.slice(0, -1);
+    } else {
+      if (pinInput.length >= 4) return;
+      pinInput += n;
+    }
+
+    updateDots();
+
+    if (pinInput.length === 4) {
+      if (pinInput === PIN) {
+        sessionStorage.setItem('editor_unlocked', '1');
+        setTimeout(unlock, 200);
+      } else {
+        // Error shake
+        document.querySelectorAll('.lock-dot').forEach(d => {
+          d.classList.add('error');
+          setTimeout(() => { d.classList.remove('error', 'filled'); }, 500);
+        });
+        pinInput = '';
+        setTimeout(updateDots, 500);
+      }
+    }
+  });
+
+  function updateDots() {
+    document.querySelectorAll('.lock-dot').forEach((d, i) => {
+      d.classList.toggle('filled', i < pinInput.length);
+    });
+  }
+
+  function unlock() {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('editor-wrap').classList.add('unlocked');
+    // ── Theme sync ──
+  function applyTheme(light) {
+    document.documentElement.classList.toggle('light', light);
+    document.getElementById('mode-btn').textContent = light ? '◑' : '○';
+  }
+  applyTheme(localStorage.getItem('life_theme') === 'light');
+  document.getElementById('mode-btn').addEventListener('click', () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('life_theme', isLight ? 'light' : 'dark');
+    document.getElementById('mode-btn').textContent = isLight ? '◑' : '○';
+  });
+
+  initEditor();
+  }
+
+  // ── Editor ──
+  function initEditor() {
+    // Populate year selector
+    const sel = document.getElementById('year-select');
+    for (let y = CURRENT_YEAR; y >= BIRTH_YEAR; y--) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      sel.appendChild(opt);
+    }
+
+    // Check URL param
+    const params = new URLSearchParams(window.location.search);
+    const urlYear = parseInt(params.get('year'));
+    if (urlYear >= BIRTH_YEAR && urlYear <= CURRENT_YEAR) {
+      sel.value = urlYear;
+    }
+
+    currentYear = parseInt(sel.value);
+    loadYear(currentYear);
+
+    sel.addEventListener('change', () => {
+      currentYear = parseInt(sel.value);
+      loadYear(currentYear);
+    });
+
+    document.getElementById('save-btn').addEventListener('click', saveYear);
+    document.getElementById('add-highlight-btn').addEventListener('click', addHighlight);
+
+    // Image URL
+    document.getElementById('url-confirm-btn').addEventListener('click', confirmImageUrl);
+    document.getElementById('url-cancel-btn').addEventListener('click', () => {
+      document.getElementById('url-input-row').classList.remove('active');
+      document.getElementById('img-url-input').value = '';
+    });
+    document.getElementById('img-url-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') confirmImageUrl();
+    });
+  }
+
+  function loadYear(year) {
+    const stored = localStorage.getItem(`life_year_${year}`);
+    const data = stored ? JSON.parse(stored) : {};
+
+    document.getElementById('field-snippet').value = data.snippet || '';
+    document.getElementById('field-text').value = data.text || '';
+
+    highlights = [...(data.highlights || [])];
+    images = [...(data.images || [])];
+
+    renderHighlights();
+    renderImages();
+  }
+
+  function saveYear() {
+    const data = {
+      snippet: document.getElementById('field-snippet').value.trim(),
+      text: document.getElementById('field-text').value.trim(),
+      highlights: highlights.filter(Boolean),
+      images: images,
+      updatedAt: new Date().toISOString()
+    };
+
+    localStorage.setItem(`life_year_${currentYear}`, JSON.stringify(data));
+
+    showToast('已保存 ✓', 'success');
+
+    // Update URL
+    history.replaceState(null, '', `edit.html?year=${currentYear}`);
+  }
+
+  // ── Highlights ──
+  function renderHighlights() {
+    const list = document.getElementById('highlights-list');
+    list.innerHTML = '';
+    highlights.forEach((text, i) => {
+      const row = document.createElement('div');
+      row.className = 'highlight-row';
+      const bullet = document.createElement('div');
+      bullet.className = 'highlight-bullet';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = text;
+      input.placeholder = '写下一件事…';
+      input.maxLength = 50;
+      input.addEventListener('input', () => { highlights[i] = input.value; });
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.title = '删除';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => {
+        highlights.splice(i, 1);
+        renderHighlights();
+      });
+      row.appendChild(bullet);
+      row.appendChild(input);
+      row.appendChild(removeBtn);
+      list.appendChild(row);
+    });
+
+    document.getElementById('add-highlight-btn').style.display =
+      highlights.length >= 8 ? 'none' : '';
+  }
+
+  function addHighlight() {
+    if (highlights.length >= 8) return;
+    highlights.push('');
+    renderHighlights();
+    // Focus last input
+    const inputs = document.querySelectorAll('.highlight-row input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }
+
+  // ── Images ──
+  function renderImages() {
+    const grid = document.getElementById('images-grid');
+    grid.innerHTML = '';
+
+    images.forEach((url, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'img-thumb';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = `照片 ${i + 1}`;
+      img.onerror = () => { thumb.style.opacity = '0.4'; };
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'img-remove';
+      removeBtn.title = '删除';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => {
+        images.splice(i, 1);
+        renderImages();
+      });
+      thumb.appendChild(img);
+      thumb.appendChild(removeBtn);
+      grid.appendChild(thumb);
+    });
+
+    if (images.length < 4) {
+      const addArea = document.createElement('div');
+      addArea.className = 'img-add-area';
+      addArea.innerHTML = `
+        <div class="img-add-icon">+</div>
+        <div class="img-add-label">添加图片</div>
+      `;
+      addArea.addEventListener('click', () => {
+        document.getElementById('url-input-row').classList.add('active');
+        document.getElementById('img-url-input').focus();
+      });
+      grid.appendChild(addArea);
+    }
+  }
+
+  function confirmImageUrl() {
+    const url = document.getElementById('img-url-input').value.trim();
+    if (!url) return;
+    if (images.length >= 4) return;
+    images.push(url);
+    document.getElementById('img-url-input').value = '';
+    document.getElementById('url-input-row').classList.remove('active');
+    renderImages();
+  }
+
+  // ── Toast ──
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast${type ? ' ' + type : ''} show`;
+    setTimeout(() => { t.classList.remove('show'); }, 2200);
+  }
+</script>
+</body>
+</html>

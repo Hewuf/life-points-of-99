@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>年度记录</title>
+  <script>if(localStorage.getItem('life_theme')!=='light')document.documentElement.classList.add('dark');</script>
+  <link rel="preconnect" href="https://fonts.font.im" crossorigin>
+  <link href="https://fonts.font.im/css2?family=Noto+Serif+SC:wght@300;400;500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: oklch(97% 0.008 80);
+      --surface: #fff;
+      --border: oklch(88% 0.008 80);
+      --text-primary: oklch(18% 0.01 60);
+      --text-secondary: oklch(45% 0.01 60);
+      --text-muted: oklch(65% 0.008 70);
+      --accent: oklch(50% 0.14 82);
+      --accent-light: oklch(94% 0.06 82);
+    }
+
+    html.dark {
+      --bg: oklch(9% 0.012 60);
+      --surface: oklch(14% 0.012 60);
+      --border: oklch(22% 0.01 60);
+      --text-primary: oklch(88% 0.01 80);
+      --text-secondary: oklch(50% 0.01 80);
+      --text-muted: oklch(32% 0.01 60);
+      --accent: oklch(76% 0.14 82);
+      --accent-light: oklch(76% 0.14 82 / 0.15);
+    }
+
+    html, body { transition: background 0.35s, color 0.35s; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Noto Serif SC', serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top nav ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+      padding: 6px 0;
+    }
+    .back-btn:hover { color: var(--text-primary); }
+    .back-arrow { font-size: 14px; margin-top: -1px; }
+
+    .topbar-year {
+      margin: 0 auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 2px;
+    }
+    .nav-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    .nav-btn:hover { color: var(--text-primary); background: var(--border); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .nav-btn:disabled:hover { background: none; color: var(--text-muted); }
+
+    /* ── Main content ── */
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 56px 32px 120px;
+    }
+
+    /* Year hero */
+    .year-hero {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .year-number {
+      font-family: 'DM Mono', monospace;
+      font-size: 64px;
+      font-weight: 300;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .year-number .age-tag {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-left: 12px;
+      font-weight: 300;
+    }
+
+    .year-snippet {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-style: italic;
+      margin-top: 8px;
+    }
+    .year-snippet.empty {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-style: normal;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Content blocks ── */
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .content-block {
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .block-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* Text block */
+    .text-content {
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      text-wrap: pretty;
+    }
+
+    /* Image grid */
+    .image-grid {
+      display: grid;
+      gap: 8px;
+    }
+    .image-grid.count-1 { grid-template-columns: 1fr; }
+    .image-grid.count-2 { grid-template-columns: 1fr 1fr; }
+    .image-grid.count-3 { grid-template-columns: 1fr 1fr; }
+    .image-grid.count-3 .img-item:first-child { grid-column: 1 / -1; }
+
+    .img-item {
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--border);
+      aspect-ratio: 4/3;
+    }
+    .img-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+      cursor: zoom-in;
+    }
+    .img-item img:hover { transform: scale(1.02); }
+
+    /* Highlights list */
+    .highlights {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .highlight-item {
+      display: flex;
+      gap: 14px;
+      align-items: baseline;
+    }
+    .highlight-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+    .highlight-text {
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+
+    /* Divider */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 8px 0;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 0;
+    }
+    .empty-icon {
+      width: 40px; height: 40px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .empty-icon::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-muted);
+    }
+    .empty-title {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .empty-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+    .edit-link {
+      display: inline-block;
+      margin-top: 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid var(--accent);
+      padding: 8px 20px;
+      border-radius: 3px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .edit-link:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Image lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      cursor: zoom-out;
+    }
+    .lightbox.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 4px;
+      object-fit: contain;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-back {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+    .footer-back:hover { color: var(--text-secondary); }
+    .footer-edit {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+    }
+
+    /* mode toggle btn */
+    .mode-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .mode-btn:hover { color: var(--text-secondary); border-color: var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .page { padding: 40px 20px 100px; }
+      .year-number { font-size: 48px; }
+      .topbar { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top nav -->
+<nav class="topbar">
+  <a href="index.html" class="back-btn">
+    <span class="back-arrow">←</span>
+    <span>返回</span>
+  </a>
+  <span class="topbar-year" id="topbar-year">—</span>
+  <div class="nav-btns">
+    <a class="nav-btn" id="prev-btn">←</a>
+    <a class="nav-btn" id="next-btn">→</a>
+    <button class="mode-btn" id="mode-btn" title="切换主题">◑</button>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="page" id="page-content">
+  <!-- Rendered by JS -->
+</main>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+  const BIRTH_YEAR = 1998;
+  const CURRENT_YEAR = new Date().getFullYear();
+
+  // Sample data
+  const SAMPLE_DATA = {
+    2026: {
+      snippet: "此刻正在发生，慢慢写吧",
+      text: "2026年还在进行中。\n\n有些事情已经发生，有些还在等待。这一年的记录会慢慢填满。",
+      highlights: ["开始这个项目", "持续在写东西", "寻找节奏"],
+      images: []
+    },
+    2025: {
+      snippet: "一些事情开始明朗",
+      text: "这一年很多模糊的事情开始有了轮廓。\n\n不是所有问题都解决了，但至少知道了方向。慢慢来，一件一件做。",
+      highlights: ["开始认真锻炼", "完成了一个长期项目", "学会了拒绝一些事情"],
+      images: []
+    },
+    2024: {
+      snippet: "深度思考，向内探索",
+      text: "花了很多时间独处，读书，思考。\n\n一些过去觉得重要的事情变得没那么重要了；一些之前忽略的东西开始浮现。",
+      highlights: ["读了很多书", "重新认识了一些人", "开始写日记"],
+      images: []
+    },
+    2023: {
+      snippet: "慢慢找到自己的节奏",
+      text: "2023年是调整的一年。",
+      highlights: ["搬到了新的地方", "尝试了一些新东西"],
+      images: []
+    },
+    2020: {
+      snippet: "疫情元年，困在原地",
+      text: "那一年大家都被困住了。\n\n意外地，静下来做了一些平时没时间做的事情。",
+      highlights: ["在家待了很久", "学了一门新技能", "重新认识了家的意义"],
+      images: []
+    },
+    1998: {
+      snippet: "出生，一切从零开始",
+      text: "1998年，出生在一个普通的城市。\n\n不记得任何事情，但这就是一切的开始。",
+      highlights: [],
+      images: []
+    },
+  };
+
+  function getData(year) {
+    const stored = localStorage.getItem(`life_year_${year}`);
+    if (stored) {
+      try { return JSON.parse(stored); } catch(e) {}
+    }
+    return SAMPLE_DATA[year] || null;
+  }
+
+  function getYear() {
+    const p = new URLSearchParams(window.location.search);
+    const y = parseInt(p.get('year'));
+    if (y >= BIRTH_YEAR && y <= BIRTH_YEAR + 99) return y;
+    return CURRENT_YEAR;
+  }
+
+  function render() {
+    const year = getYear();
+    const age = year - BIRTH_YEAR;
+    const data = getData(year);
+
+    // Topbar
+    document.getElementById('topbar-year').textContent = year;
+    document.title = `${year} · 人生只有99个点`;
+
+    // Nav
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const prevYear = year - 1;
+    const nextYear = year + 1;
+
+    if (prevYear >= BIRTH_YEAR) {
+      prevBtn.href = `detail.html?year=${prevYear}`;
+      prevBtn.title = prevYear;
+    } else {
+      prevBtn.removeAttribute('href');
+      prevBtn.style.opacity = '0.2';
+      prevBtn.style.pointerEvents = 'none';
+    }
+
+    if (nextYear <= CURRENT_YEAR) {
+      nextBtn.href = `detail.html?year=${nextYear}`;
+      nextBtn.title = nextYear;
+    } else {
+      nextBtn.removeAttribute('href');
+      nextBtn.style.opacity = '0.2';
+      nextBtn.style.pointerEvents = 'none';
+    }
+
+    const main = document.getElementById('page-content');
+
+    // Hero
+    const hero = document.createElement('div');
+    hero.className = 'year-hero';
+    hero.innerHTML = `
+      <div class="year-number">${year}<span class="age-tag">${age} 岁</span></div>
+      ${data?.snippet
+        ? `<div class="year-snippet">${data.snippet}</div>`
+        : `<div class="year-snippet empty">— 这一年还没有记录</div>`
+      }
+    `;
+    main.appendChild(hero);
+
+    if (!data || (!data.text && !data.highlights?.length && !data.images?.length)) {
+      // Empty state
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = `
+        <div class="empty-icon"></div>
+        <div class="empty-title">这一年还没有内容</div>
+        <div class="empty-sub">记录下这一年的故事</div>
+        <a href="edit.html?year=${year}" class="edit-link">写下这一年 →</a>
+      `;
+      main.appendChild(empty);
+    } else {
+      const content = document.createElement('div');
+      content.className = 'content-area';
+
+      // Text
+      if (data.text) {
+        const block = document.createElement('div');
+        block.className = 'content-block';
+        block.style.animationDelay = '0.05s';
+        block.innerHTML = `
+          <div class="block-label">年度记录</div>
+          <div class="text-content">${escapeHtml(data.text)}</div>
+        `;
+        content.appendChild(block);
+      }
+
+      // Divider
+      if (data.text && data.highlights?.length) {
+        content.appendChild(Object.assign(document.createElement('hr'), { className: 'section-divider' }));
+      }
+
+      // Highlights
+      if (data.highlights?.length) {
+        const block = document.createElement('div');
+        block.className = 'content-block';
+        block.style.animationDelay = '0.1s';
+        const items = data.highlights.map(h =>
+          `<li class="highlight-item"><div class="highlight-dot"></div><span class="highlight-text">${escapeHtml(h)}</span></li>`
+        ).join('');
+        block.innerHTML = `
+          <div class="block-label">这一年</div>
+          <ul class="highlights">${items}</ul>
+        `;
+        content.appendChild(block);
+      }
+
+      // Images
+      if (data.images?.length) {
+        const block = document.createElement('div');
+        block.className = 'content-block';
+        block.style.animationDelay = '0.15s';
+        const count = Math.min(data.images.length, 4);
+        const gridClass = `image-grid count-${Math.min(count, 3)}`;
+        const imgs = data.images.slice(0, 4).map((url, i) =>
+          `<div class="img-item"><img src="${escapeHtml(url)}" alt="照片 ${i+1}" loading="lazy"></div>`
+        ).join('');
+        block.innerHTML = `
+          <div class="block-label">照片</div>
+          <div class="${gridClass}">${imgs}</div>
+        `;
+        content.appendChild(block);
+
+        // Lightbox
+        block.querySelectorAll('img').forEach(img => {
+          img.addEventListener('click', () => openLightbox(img.src));
+        });
+      }
+
+      main.appendChild(content);
+    }
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'page-footer';
+    footer.innerHTML = `
+      <a href="index.html" class="footer-back">← 返回时间线</a>
+      <a href="edit.html?year=${year}" class="footer-edit">编辑这一年 →</a>
+    `;
+    main.appendChild(footer);
+  }
+
+  function openLightbox(src) {
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = src;
+    lb.classList.add('active');
+  }
+
+  document.getElementById('lightbox').addEventListener('click', function() {
+    this.classList.remove('active');
+  });
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  render();
+
+  // ── Theme sync ──
+  function applyTheme(dark) {
+    document.documentElement.classList.toggle('dark', dark);
+    document.getElementById('mode-btn').textContent = dark ? '○' : '◑';
+  }
+  applyTheme(localStorage.getItem('life_theme') !== 'light');
+  document.getElementById('mode-btn').addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('life_theme', isDark ? 'dark' : 'light');
+    document.getElementById('mode-btn').textContent = isDark ? '○' : '◑';
+  });
+</script>
+</body>
+</html>
