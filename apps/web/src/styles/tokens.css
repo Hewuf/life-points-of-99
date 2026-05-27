@@ -1,0 +1,89 @@
+/* 色彩 / 间距 / 排印 token；明暗双套，由 [data-theme] 切换。 */
+
+:root,
+[data-theme='dark'] {
+  /* 背景：深夜蓝紫，顶部带一丝暖光 */
+  --bg-gradient-start: #080b16;
+  --bg-gradient-end: #11172e;
+  --bg-warm-hint: rgba(247, 198, 124, 0.06);
+
+  /* 文本 */
+  --text-primary: #ece9e1;
+  --text-secondary: #8b91a8;
+  --text-muted: rgba(236, 233, 225, 0.45);
+
+  /* 河面 */
+  --river-lived-from: #f0b35a;
+  --river-lived-to: #e5826a;
+  --river-future: rgba(150, 170, 215, 0.14);
+  --river-future-strong: rgba(150, 170, 215, 0.22);
+
+  /* present 萤火虫 */
+  --firefly-core: #ffd479;
+  --firefly-glow: #ffbe55;
+
+  /* future 点 */
+  --future-dot: #5d6c93;
+
+  /* 卡片 / 浮层 */
+  --surface-1: rgba(20, 26, 48, 0.78);
+  --surface-2: rgba(28, 35, 60, 0.92);
+  --border-subtle: rgba(236, 233, 225, 0.08);
+  --border-strong: rgba(236, 233, 225, 0.18);
+
+  /* 阴影 */
+  --shadow-card: 0 12px 36px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme='light'] {
+  --bg-gradient-start: #fcf6ee;
+  --bg-gradient-end: #eceefb;
+  --bg-warm-hint: rgba(247, 198, 124, 0.18);
+
+  --text-primary: #2c2a34;
+  --text-secondary: #797787;
+  --text-muted: rgba(44, 42, 52, 0.45);
+
+  --river-lived-from: #df8e2c;
+  --river-lived-to: #cd6549;
+  --river-future: rgba(92, 112, 162, 0.18);
+  --river-future-strong: rgba(92, 112, 162, 0.28);
+
+  --firefly-core: #ef9f2b;
+  --firefly-glow: #f3ad42;
+
+  --future-dot: #a9b1cb;
+
+  --surface-1: rgba(255, 251, 244, 0.82);
+  --surface-2: rgba(255, 251, 244, 0.95);
+  --border-subtle: rgba(44, 42, 52, 0.08);
+  --border-strong: rgba(44, 42, 52, 0.18);
+
+  --shadow-card: 0 12px 36px rgba(78, 70, 60, 0.18);
+}
+
+:root {
+  /* 排印 */
+  --font-serif-zh: 'Noto Serif SC', 'Songti SC', 'Source Han Serif SC', serif;
+  --font-serif-num: 'Fraunces', 'Noto Serif SC', serif;
+
+  /* 间距 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* z-index */
+  --z-header: 50;
+  --z-tooltip: 100;
+  --z-modal: 200;
+}

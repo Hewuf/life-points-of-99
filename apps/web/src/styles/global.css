@@ -1,0 +1,40 @@
+html {
+  background: var(--bg-gradient-start);
+}
+
+body {
+  font-family: var(--font-serif-zh);
+  color: var(--text-primary);
+  background:
+    radial-gradient(
+      ellipse 90% 60% at 50% 8%,
+      var(--bg-warm-hint),
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--bg-gradient-end) 0%, var(--bg-gradient-start) 60%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+#root {
+  isolation: isolate;
+}
+
+/* 数字 / 拉丁 走衬线品牌字体 */
+.numerals,
+time {
+  font-family: var(--font-serif-num);
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+}
+
+::selection {
+  background: rgba(245, 188, 109, 0.32);
+  color: var(--text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--firefly-glow);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

@@ -1,0 +1,109 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5) var(--space-8);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: var(--space-6);
+  transition: color 160ms ease;
+}
+.back:hover {
+  color: var(--text-primary);
+}
+
+.meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: var(--space-3);
+}
+
+.year {
+  font-family: var(--font-serif-num);
+  font-size: 36px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.age {
+  font-family: var(--font-serif-num);
+  color: var(--text-secondary);
+}
+
+.title {
+  font-family: var(--font-serif-zh);
+  font-size: 28px;
+  line-height: 1.35;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-5);
+}
+
+.placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+  border-left: 2px solid var(--border-subtle);
+  padding-left: var(--space-4);
+  margin: var(--space-4) 0;
+}
+
+.section {
+  margin-top: var(--space-6);
+}
+
+.sectionLabel {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.keyword {
+  padding: 4px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.image {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.future {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--space-8) 0;
+}

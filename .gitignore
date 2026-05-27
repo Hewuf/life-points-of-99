@@ -1,1 +1,22 @@
 .DS_Store
+
+# Node
+node_modules/
+dist/
+build/
+.vite/
+*.log
+*.tsbuildinfo
+
+# Env (隐私：真实 env 与个人数据不进仓库)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db

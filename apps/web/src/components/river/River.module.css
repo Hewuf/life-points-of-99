@@ -1,0 +1,74 @@
+.container {
+  position: relative;
+  width: 100%;
+  /* 容器高度由 SVG 决定；这里只控制水平上的限宽与居中 */
+  display: flex;
+  justify-content: center;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+  width: 100%;
+  height: auto;
+}
+
+/* 未来段：很淡的底线，全程铺底 */
+.futureTrack {
+  fill: none;
+  stroke: var(--river-future);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 已度过段：暖色渐变，只画从底部到 present 的弧段 */
+.livedTrack {
+  fill: none;
+  stroke: url(#river-lived-gradient);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(240, 179, 90, 0.35));
+}
+
+/* past 点 */
+.dotPast {
+  cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dotPast:hover,
+.dotPast:focus-visible {
+  transform: scale(1.35);
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* present 点（呼吸动效暂未启用，先静态柔光） */
+.dotPresent {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dotPresentHalo {
+  fill: var(--firefly-glow);
+  opacity: 0.32;
+  pointer-events: none;
+}
+.dotPresentCore {
+  fill: var(--firefly-core);
+  filter: drop-shadow(0 0 10px var(--firefly-glow));
+}
+
+/* future 点 */
+.dotFuture {
+  fill: var(--future-dot);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 隐藏但可达：仅为 a11y，让 SVG 元素也能被键盘导航 */
+.hitArea {
+  fill: transparent;
+}

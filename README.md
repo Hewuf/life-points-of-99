@@ -1,22 +1,50 @@
-# CODING AGENTS: READ THIS FIRST
+# 人生 · 99（Life-99）
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+用 99 个光点串起的一生时间轴。一条蜿蜒向上流动的河承载 99 个里程碑，过去的河面发光，未来的河面向页面顶部收束、消失在地平线外；当下那一年以萤火虫呼吸感的光点呈现，提醒"还在发生"。
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+详细需求与技术方案见 `life-99-requirements.md`。
 
-## What you should do — IMPORTANT
+## 仓库结构
 
-**Read `life-points-of-99/project/index.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+```
+apps/web/               # 前端（Vite + React + TypeScript）
+  src/
+    pages/              # 路由页面
+    components/         # 河流 / 主题 / 浮卡 等
+    lib/                # 河流几何、情绪色等纯函数
+    hooks/              # 数据访问 hooks（V1 用 sample data，后续接 Supabase）
+    styles/             # CSS 变量、reset、全局
+docs/                   # 设计/需求草稿
+```
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+## 本地运行
 
-## About the design files
+```bash
+pnpm install
+pnpm dev
+```
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+打开 http://localhost:5173。
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+## 隐私与开源
 
-## Bundle contents
+- 出生年、姓名、邮箱、个人记录文本、照片均不进仓库，详见需求文档 §9.4。
+- `.env` 已在 `.gitignore`。请按 `apps/web/.env.example` 自行创建本地 `.env`。
+- 仓库中只允许出现 Supabase publishable key 占位（最终也由作者自己填）；任何 secret key 都不可入仓。
 
-- `life-points-of-99/README.md` — this file
-- `life-points-of-99/project/` — the `life-points-of-99` project files (HTML prototypes, assets, components)
+## 开发阶段
+
+当前已落地（阶段 A + B）：
+
+- pnpm monorepo + Vite + React + TS + React Router 骨架
+- 明/暗主题（CSS 变量 + `data-theme` + `prefers-color-scheme` + localStorage）
+- SVG 河流主页：蜿蜒中线、99 点三态、加权弧长分布、两段着色、自动定位 present、悬停摘要卡、点击进详情
+- 情绪色（mood_score → 色带）
+- 详情页查看态占位
+
+后续待做（阶段 C/D/E）：
+
+- 萤火虫呼吸 + reduced-motion 降级（视觉细节）
+- Supabase 接入（Postgres + Storage + Magic Link Auth + RLS）
+- 详情编辑态 + 图片上传
+- 标签筛选、海报导出

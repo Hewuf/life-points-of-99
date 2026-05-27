@@ -1,0 +1,57 @@
+.tooltip {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  /* x/y 由 inline style 提供（SVG 坐标），这里只控制气泡形态 */
+  transform: translate(-50%, calc(-100% - 14px));
+  pointer-events: none;
+
+  min-width: 180px;
+  max-width: 260px;
+  padding: var(--space-3) var(--space-4);
+
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--surface-2);
+}
+
+.meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.year {
+  font-family: var(--font-serif-num);
+  font-size: 16px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.title {
+  font-family: var(--font-serif-zh);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
