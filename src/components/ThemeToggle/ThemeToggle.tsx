@@ -11,7 +11,6 @@ export default function ThemeToggle() {
       type="button"
       className={styles.button}
       onClick={() => setTheme(next)}
-      aria-label={`切换到${isDark ? '亮' : '暗'}色主题`}
       title={`切换到${isDark ? '亮' : '暗'}色主题`}
     >
       {label}

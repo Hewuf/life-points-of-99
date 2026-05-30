@@ -15,15 +15,15 @@
 
 ## 1. 项目背景与设计理念
 
-用"里程碑"的方式记录人的一生。把一生（99 岁）抽象成页面上的 **99 个光点**，以一条**蜿蜒向上流动的河**串起，让人直观看到自己人生的进度，从而珍惜时间、思考如何更有意义地度过这一生。
+用"里程碑"的方式记录人的一生。把一生（99 岁）抽象成页面上的 **99 个光点**，以一条**横向蛇形蜿蜒流过一屏的河**串起，让人直观看到自己人生的进度，从而珍惜时间、思考如何更有意义地度过这一生。
 
 设计内核不是"记录工具"，而是用一个视觉隐喻让人直面"时间有限"。情感基调取**希望 / 梦幻**方向；当下那一年用**萤火虫呼吸感**的动效表达"正在发生、仍然鲜活"。
 
 核心隐喻：
 
-- **河自下而上流动** —— 底部是出生，越往上越接近未来；人只能向前/向上走。
-- **走过的河面发光，前方的河面暗淡** —— 脚下的路是暖色、明亮的；未来只剩一条淡淡的、向顶部收细的痕。
-- **未来被压缩在远处** —— 未来的点更小、更暗、间距更密，向页面顶部收束，像消失在地平线外。
+- **横向蛇形河，一屏内走完一生** —— 左上是出生年，5 行 ltr / rtl 交替的蛇形，向右下推进；人只能向前走，不能回头。
+- **走过的河面发光，前方的河面暗淡** —— 已度过段是暖色、明亮，并叠加缓慢流光；未来段只剩一条淡淡的痕。
+- **未来被压缩在远处** —— 未来的点更小、更暗、间距更密，向河尾（右下）收束，像消失在地平线外。
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### 2.1 V1 必做（本期核心）
 
-- 主页：河流时间线（99 点、三态、萤火虫呼吸、自动定位、悬停摘要、点击进详情）。
+- 主页：河流时间线（横向蛇形一屏 SVG、99 点三态、双层萤火虫呼吸、悬停摘要、点击进详情）。
 - 详情页：查看 + 编辑（仅作者）。
 - 权限：所有人只读、作者一人可编辑（Supabase Auth + RLS）。
 - 主题：明 / 暗双主题。
@@ -64,7 +64,7 @@
 - **三态**：
   - **past（过去）**：`i < currentIndex`。正常大小、正常间距、有情绪色。
   - **present（当下）**：`i === currentIndex`。河流线上的同一个节点，叠加萤火虫呼吸。
-  - **future（未来）**：`i > currentIndex`。更小、更暗、间距更密，向顶部收束。
+  - **future（未来）**：`i > currentIndex`。更小、更暗、间距更密，向河尾（右下）收束。
 
 ---
 
@@ -136,34 +136,34 @@ create policy "owner write" on year_entries
 
 **布局与方向**
 
-- 河 **自下而上**：底部 = 出生（`i=0`），顶部 = 最远的未来（`i=98`）。
-- **竖向滚动**：内容高度超出一屏，靠竖向滚动浏览。河整体竖向流动、**弱化弯曲**（仅小幅左右摆动，是"一条向上流的河"而非来回折返的蛇形）。
-- **打开页面自动滚动定位到呼吸点（present）**，并让它落在视口**偏下**的位置：下方能看到发光的过去，上方能看到收束的未来——一开页面就站在"现在"。
-- 响应式：移动端宽度收窄，左右摆动幅度随之缩小。
+- 河 **横向蛇形 + 一屏 SVG**：viewBox 固定 `0 0 1000 680`，`preserveAspectRatio="xMidYMid meet"` 等比缩放。5 行 `ltr/rtl` 交替，行间用 `bow` 偏移连接形成 S 形，整张图一次性呈现，**不滚动**。
+- **方向**：左上 = 出生（`i=0`），按蛇形向右下推进，最远的未来 `i=98` 落在右下。
+- **present 始终在屏内可见**，无需自动滚动；容器 `aspect-ratio: 1000 / 680` 保证 SVG 1:1 填满，tooltip 坐标用同一 `scale` 换算。
+- 响应式：宽度自动缩放，SVG 内部参数（rows、wobble、bow）保持固定；移动端整张 SVG 等比缩小，触控可达性靠 hit-area circle（≥16px）兜底。
 
 **99 个点的分布与三态**
 
 - 点沿河（SVG path）按**加权弧长**分布：
   - past / present 段：等距（正常间距）。
-  - future 段：间距随距离递减、越远越密（向顶部收束）。
-- **past 点**：正常半径、情绪色（见 7.2）、不透明度高。
-- **present 点**：就是河流线上"今年"那个节点本身，叠加萤火虫呼吸（见 7.3）。呼吸光必须从该节点发出，**不得是河外的独立元素**。
-- **future 点**：半径随距离衰减、不透明度衰减、用中性冷色；向顶部越来越小越暗。
+  - future 段：间距随距离递减、越远越密（向河尾收束）。
+- **past 点**：正常半径、情绪色（见 7.2）、不透明度高；悬停 `filter: brightness(1.25)` 含蓄发光，避免夸张缩放。
+- **present 点**：就是河流线上"今年"那个节点本身，叠加双层萤火虫呼吸（见 7.3）。呼吸光必须从该节点发出，**不得是河外的独立元素**。
+- **future 点**：半径随距离衰减、不透明度衰减、用中性冷色；越接近河尾越小越暗。
 - **河面分两段着色**：
-  - 已度过段（底部 → present）：暖色、明亮、可带极轻微"流动"微光。
-  - 未来段（present → 顶部）：淡、细，向顶部进一步收细/淡出。
+  - 已度过段（起点 → present）：暖色描边渐变，叠加 `stroke-dasharray="2 26"` 的萤火光点 `flow 9s linear infinite` 沿段缓慢漂流。
+  - 未来段（present → 河尾）：淡冷色细线，向河尾进一步收细/淡出。
   - present 点位于两段交界。
 
 **交互**
 
-- 悬停任意 **past / present** 点：浮出小卡片，展示 `年份`、`X 岁`、`状态`、`一句话总结`（无内容时显示占位文案）。future 点不响应悬停。
+- 悬停任意 **past / present** 点：浮出小卡片，展示 `年份（Fraunces 21px）`、`状态徽章圆点`、`X 岁`、`状态`、`一句话总结`（无内容时 italic 占位）。future 点不响应悬停。tooltip 入场用 `opacity + translateY + scale(.97→1)` 0.18s。
 - 点击 **past / present** 点：跳转该年详情页（`/year/:year`）。**future 点不可点击**（光标默认态、视觉淡）。
-- 顶部展示**进度读数**作为「情绪基调文案」的占位：用中性百分比/计数，如 `已度过 33%` 或 `32 / 99`。最终情绪化文案待定，先用中性占位，不要写带强烈情绪导向的句子。
-- 主题切换入口（明/暗）。
+- 顶部展示**进度读数**：用中性计数 `${currentIndex} / 99 已点亮`（"点亮"与萤火虫隐喻一致），不要写带强烈情绪导向的句子。
+- 主题切换入口（明/暗），pill 按钮 + `☀ 切到白天` / `☾ 切到夜晚` 文案。
 
-**实现优先级（建议顺序）**：① 河 + 99 点三态静态形态 → ② 自下而上 + 竖向滚动 + 自动定位 present → ③ 萤火虫呼吸 + reduced-motion 降级 → ④ 已度过/未来两段着色 → ⑤ 情绪色 → ⑥ 悬停卡片 + 点击跳转。
+**实现优先级（建议顺序）**：① 河 + 99 点三态静态形态（横向蛇形）→ ② 已度过 / 未来两段着色 + 流光 → ③ 萤火虫呼吸（双层光晕 + drift）+ `prefers-reduced-motion` 全套降级 → ④ 情绪色 → ⑤ 悬停卡片（含状态徽章）+ 点击跳转 → ⑥ 响应式缩放。
 
-> 河流生成、弧长分布、三态、萤火虫的具体算法见**附录 A**；可参考随附的 HTML 原型（附录 C）理解视觉目标，但 React 实现请按附录 A 重写，不要直接套 HTML。
+> 河流生成、弧长分布、三态、萤火虫的具体算法见**附录 A**；视觉与动效形态以 HTML 原型（附录 C）为对齐目标，React 实现按附录 A 的描述组织，不直接搬运 HTML。
 
 ### 5.2 详情页（`/year/:year`）
 
@@ -187,6 +187,8 @@ create policy "owner write" on year_entries
 - **公开只读无需登录**：访客直接用 Supabase **publishable key**（`sb_publishable_…`，2025 年新密钥模型，替代旧的 `anon` key）读取数据。
 - **作者登录**：`/login` 路由，采用 **Magic Link（邮箱免密登录）**。作者邮箱放环境变量，**不写死在源码**。
 - 登录后前端持有作者身份（`auth.uid()`），写操作被 RLS 放行。
+- **登录成功后自动跳转回 `/`**：Magic Link 回跳到 `/login`，`onAuthStateChange` 拿到 session 后 LoginPage 渲染 `<Navigate to="/" replace />`，用户不需要手动点击。
+- 退出登录入口随详情页编辑态（§5.2）一起在 header 提供（暂未实现）。
 - 全站只有一个账号（作者本人）。**不实现注册流程。**
 - 前端只使用 **publishable key**（`sb_publishable_…`，可公开，安全由 RLS 兜底）直连 Supabase；**绝不在前端或仓库出现 secret key（`sb_secret_…`，替代旧的 `service_role` key）**。
 
@@ -277,7 +279,7 @@ create policy "owner write" on year_entries
 ## 8. 非功能需求
 
 - **可访问性**：尊重 `prefers-reduced-motion`；点支持键盘可达与焦点态；图片填写 `alt`；悬停信息也应有非悬停的获取方式（移动端无 hover，点击/聚焦即可看摘要）。
-- **响应式**：桌面与移动端均良好；移动端河身变窄、摆动收敛、自动定位 present 仍生效。
+- **响应式**：桌面与移动端均良好；整张 SVG 等比缩小，hit-area circle 兜底触控目标（≥16px）。
 - **性能**：详情页图片懒加载；主页主要是 SVG，避免一次性加载所有原图（主页不展示原图）。
 - **隐私/开源**：见第 9.4 节，作为验收项之一。
 - **SEO**：基础 meta 即可，非重点。
@@ -328,7 +330,7 @@ src/
    - 建表、RLS 策略、存储桶、TypeScript 类型生成、客户端接线等代码/SQL 工作由 Claude Code 完成。**若作者已为 Claude Code 接入官方 Supabase MCP server，则上述建表/策略/拉取配置可由 Claude Code 通过 MCP 直接执行**；否则 Claude Code 产出 migration SQL，由作者贴入 Dashboard SQL Editor 或用 Supabase CLI 执行。
 2. `useProfile` / `useYearEntries` 数据层跑通（读）。
 3. 主页：按附录 A 实现河 + 99 点三态静态形态。
-4. 自下而上方向 + 竖向滚动 + 自动定位 present。
+4. 横向蛇形 + 一屏 SVG（viewBox 1000×680，容器 aspect-ratio 1000/680 等比填满）。
 5. 萤火虫呼吸 + reduced-motion 降级。
 6. 两段着色 + 情绪色。
 7. 悬停卡片 + 点击跳转详情。
@@ -364,66 +366,87 @@ src/
 
 > 目标：在 React 中用 SVG 复现原型的视觉。以下为关键、非显然的实现要点。
 
-1. **生成蜿蜒中线（自下而上、弱弯曲）**
-   - 以**底部为起点、顶部为终点**生成一条竖向流动、左右小幅摆动的中线。
-   - 用一组路径点（waypoints）+ Catmull-Rom 转贝塞尔得到平滑 path：对每段 `Pi→Pi+1`，控制点
-     `cp1 = Pi + (Pi+1 − Pi−1)/6`，`cp2 = Pi+1 − (Pi+2 − Pi)/6`（端点处复制边界点）。
-   - 摆动幅度相对画布宽度要小（"不那么婉转"）。整条 path 的**高度随点数撑开**，超出视口由竖向滚动查看。
+1. **固定 viewBox 与容器**
+   - SVG `viewBox="0 0 1000 680"`，`preserveAspectRatio="xMidYMid meet"`。
+   - 容器 `aspect-ratio: 1000 / 680`，保证 SVG 在不同视口宽度下 1:1 等比填满，不留 letterbox；tooltip 与 hover 坐标可用同一 `scale = containerWidth / 1000` 换算。
 
-2. **沿 path 按加权弧长分布 99 个点**
+2. **生成横向蛇形中线**
+   - 内边距 `mT=64, mB=70, mL=70, mR=70`，行数 `rows=5`，每行 `segmentsPerRow=5` 段。
+   - 第 `r` 行 `ltr = r % 2 === 0`；每段点：
+     - `x = ltr ? xL + fx*usableW : xR - fx*usableW`
+     - `y = y0 + sin(fx*π*1.6 + r*1.3) * wob`（`wob=22`，制造行内轻微起伏）
+   - 相邻行之间插一个 `bow` 连接点：`x = (ltr ? xR : xL) ± 46`，`y = y0 + rowGap/2`，让转弯弧形自然。
+   - Catmull-Rom 转 cubic Bezier 拼成平滑 path：`cp1 = Pi + (Pi+1 − Pi−1)/6`，`cp2 = Pi+1 − (Pi+2 − Pi)/6`，端点复制边界点。
+
+3. **沿 path 按加权弧长分布 99 个点**
    - 取 `path.getTotalLength()`；对每个点 `i` 计算累计权重位置，再 `path.getPointAtLength(len_i)` 得坐标。
-   - 权重：`i ≤ currentIndex` 时 `w=1.0`（等距）；`i > currentIndex` 时 `w` 随距离衰减（默认 `max(0.24, 0.42 * 0.965^k)`，`k = i − currentIndex`），实现未来越远越密、向顶部收束。
-   - 归一化使总长落在 path 上（留一点末端余量）。
+   - 权重：`i ≤ currentIndex` 时 `w=1.0`（等距）；`i > currentIndex` 时 `w = max(0.24, 0.42 * 0.965^k)`，`k = i − currentIndex`，实现未来越远越密、向河尾收束。
+   - 归一化到 `usableFraction = 0.985`，留 1.5% 末端余量避免点贴在 path 终点。
 
-3. **三态渲染**
-   - past：正常半径（默认 r≈6）、情绪色、高不透明度。
-   - present：河上同一节点，叠加萤火虫（见下）。
-   - future：半径与不透明度随 `k` 衰减（默认 `r=max(2.1, 5.4*0.972^k)`，`opacity=max(0.16, 0.62*0.955^k)`），中性冷色。
+4. **三态渲染**
+   - past：正常半径（默认 `r=6`）、情绪色、高不透明度。
+   - present：河上同一节点；**外层 `<g>` 用 SVG `transform="translate(x y)"` 定位**，**内层 `<g class="presentDrift">` 跑 CSS `drift` 动画**——两层分开避免 SVG 与 CSS transform 冲突。
+   - future：半径与不透明度随 `k` 衰减（默认 `r = max(2.1, 5.4*0.972^k)`，`opacity = max(0.16, 0.62*0.955^k)`），中性冷色。
 
-4. **两段着色**
-   - 已度过河面：从底部到 present 的弧段，用暖色描边、明亮；可用 `stroke-dasharray = "livedLen totalLen"` 只画前段。
-   - 未来河面：全程一条很淡的底色描边垫底；向顶部可再收细/淡出。
+5. **两段着色 + 流光**
+   - 用 `pathLength={1}` 把 path 长度归一化，便于直接以 `strokeDasharray="${livedFraction} 1"` 画段。
+   - 全程一条 `--river-future` 淡线垫底；之上再画一条 `url(#river-lived-gradient)` 暖色描边，只画 0 → present 段，加 `drop-shadow` 柔光。
+   - 第三条同 path、`stroke="--firefly-glow"` + `stroke-dasharray="2 26"`、`flow 9s linear infinite` 让萤火光点缓慢沿河漂移。
 
-5. **萤火虫呼吸（仅 present）**
-   - 光晕圆做 `scale + opacity` 的 ~4.2s `ease-in-out` 循环；核心点轻微同步脉动；外层组可加 ±2px 级别缓慢漂移。
-   - SVG 元素动画用 `transform-box: fill-box; transform-origin: center;`。
-   - `@media (prefers-reduced-motion: reduce)` 下全部关停，present 显示静态柔光。
-
-6. **自动定位 present**
-   - 首次渲染、布局完成后，把滚动位置设到 present 节点处，使其落在视口偏下（约 55–60% 高度处），让下方的"过去"与上方的"未来"都可见。
+6. **萤火虫呼吸（仅 present）**
+   - 内层 `<g.presentDrift>` 包三个 circle：`bloomOuter (r=26, opacity=0.18)`、`bloomInner (r=16, opacity=0.4, animation-delay 0.6s)`、`presentCore (r=7)`。
+   - bloom 走 `breathe 4.2s ease-in-out`（`scale 0.88↔1.12 + opacity 0.32↔0.60`，幅度克制，避免远观像闪烁）；core 走 `corepulse 4.2s`（`scale 1↔1.10 + opacity 0.92↔1`）；外组 drift `±2px` 浮动。
+   - 必须 `transform-box: fill-box; transform-origin: center;`，否则 CSS transform 以 SVG 原点为中心、动效会偏。
+   - `@media (prefers-reduced-motion: reduce)`：bloom 静态 `scale(1.05) opacity 0.55`；core / drift / flow 全部 `animation: none`，flow 用 `opacity: 0` 隐去。
 
 7. **悬停 / 点击**
-   - past/present 点：悬停出摘要卡（年份/年龄/状态/一句话），点击进 `/year/:year`。
+   - past / present 点：悬停出摘要卡（年份 / 状态徽章圆点 / 年龄 / 一句话），点击进 `/year/:year`。
    - future 点：不响应。
+   - tooltip 用 `position: absolute; left: svgX * scale; top: (svgY - radius) * scale;` 放在容器内，无需读 DOM 反查。
+
+8. **可访问性**
+   - SVG 标 `role="img"` + `aria-label`；past / present 的 `<g>` 标 `role="button"` + `tabIndex={0}` + `aria-label`，支持键盘 Enter / Space 激活。
+   - 每个可点击点叠加一个 `r ≥ 14` 的透明 `hitArea` circle 兜底点击 / 触控目标。
+   - `:focus-visible` 用全局 `outline: 2px solid var(--firefly-glow)` 保持视觉一致。
 
 ---
 
 ## 附录 B：推荐默认参数（集中可调）
 
-| 参数             | 默认值                      | 含义                       |
-| ---------------- | --------------------------- | -------------------------- |
-| lifespan         | 99                          | 点数                       |
-| 未来间距权重     | `max(0.24, 0.42 * 0.965^k)` | 越大越疏；调小让未来更紧迫 |
-| past 点半径      | 6                           |                            |
-| present 核心半径 | 7                           |                            |
-| future 半径      | `max(2.1, 5.4 * 0.972^k)`   |                            |
-| future 不透明度  | `max(0.16, 0.62 * 0.955^k)` |                            |
-| 呼吸周期         | 4.2s                        | 越慢越"呼吸"               |
-| 漂移幅度         | ±2px 级                     | 萤火虫浮游感               |
-| 自动定位高度     | 视口 55–60%                 | present 落点               |
-| title 上限       | 50 字                       |                            |
-| 关键词上限       | 8 条                        |                            |
-| 图片上限         | 12 张                       |                            |
+| 参数 | 默认值 | 含义 |
+| --- | --- | --- |
+| lifespan | 99 | 点数 |
+| viewBox | 1000 × 680 | SVG 视图，固定 |
+| rows / segmentsPerRow | 5 / 5 | 横向蛇形行数 / 每行段数 |
+| margin TRBL | 64 / 70 / 70 / 70 | path 内边距（上/右/下/左） |
+| wobble 振幅 (wob) | 22 | 每行内 sin 起伏幅度 |
+| bow 偏移 | ±46 | 行间转弯弧度 |
+| usableFraction | 0.985 | 99 点占满 path 的比例（留 1.5% 余量） |
+| 未来间距权重 | `max(0.24, 0.42 * 0.965^k)` | 越大越疏；调小让未来更紧迫 |
+| past 点半径 | 6 |  |
+| present 核心半径 | 7 |  |
+| future 半径 | `max(2.1, 5.4 * 0.972^k)` |  |
+| future 不透明度 | `max(0.16, 0.62 * 0.955^k)` |  |
+| 呼吸周期 | 4.2s | 越慢越"呼吸" |
+| bloomInner 延迟 | 0.6s | 双层光晕错相，避免同步呼吸太规律 |
+| drift 周期 / 幅度 | 7s / ±2px 级 | 萤火虫浮游感 |
+| flow 周期 | 9s | 已度过段流光速率 |
+| flow stroke-dasharray | `2 26` | 流光"光点"间距 |
+| tooltip 入场 | 0.18s | `opacity + translateY + scale(.97→1)` |
+| hit-area 最小半径 | `max(r+8, 14)` | 兜底键盘 / 触控目标 |
+| title 上限 | 50 字 |  |
+| 关键词上限 | 8 条 |  |
+| 图片上限 | 12 张 |  |
 
 ---
 
 ## 附录 C：原型参考
 
-随本文档提供了一个 HTML 可交互原型（`life-99-river-prototype.html`），用于传达河流、三态、萤火虫呼吸的**视觉目标**。注意：
+随本文档提供了一个 HTML 可交互原型（`ux/life-99-river-prototype.html`），是 V1 主页的**视觉与形态对齐目标**：
 
-- 原型为上一版**自上而下、较强蛇形**的版本；本文档的正式要求是**自下而上、弱弯曲、竖向滚动、自动定位 present**，以本文档为准。
-- 原型是单文件 HTML，React 实现请按附录 A 重写组织，不要直接搬运。
-- 原型中"已度过河面发光/未来淡"、情绪色占位、明暗主题、reduced-motion 降级等，均为本文档要保留的方向。
+- **横向蛇形 + 一屏 SVG**、暖色已度过段 + 流光、冷淡未来段、双层萤火虫呼吸 + 漂移、状态徽章 tooltip、`prefers-reduced-motion` 全套降级，均按原型实现。
+- React 实现按附录 A 组织重写，不直接搬运 HTML；mood 色按 §7.2 用真实 `mood_score` 插值，而非原型里 `(i*5+3) % palette.length` 的占位调色板。
+- 注意：原型用 `BIRTH_YEAR=1994` 等占位常量演示，正式实现从 `life_profile` 读真实出生年与展示名，仓库内绝不出现作者真实数据（见 §9.4）。
 
 ---
 

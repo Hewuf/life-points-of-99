@@ -170,6 +170,7 @@ export default function River({ profile, entriesByYear, currentYear }: Props) {
                 cy={p.y}
                 r={p.radius}
                 fill={color}
+                style={{ color }}
                 opacity={p.opacity}
               />
               <circle

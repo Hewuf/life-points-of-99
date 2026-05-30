@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { sendMagicLink, signOut, useAuth } from '../../hooks/useAuth';
+import { Link, Navigate } from 'react-router-dom';
+import { sendMagicLink, useAuth } from '../../hooks/useAuth';
 import styles from './LoginPage.module.css';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 export default function LoginPage() {
-  const { session, loading, email: signedInEmail } = useAuth();
+  const { session, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -19,30 +19,9 @@ export default function LoginPage() {
     );
   }
 
+  // 已登录直接回主页；Magic Link 回跳后 onAuthStateChange 触发 session，下次渲染落到这里
   if (session) {
-    return (
-      <div className={styles.page}>
-        <h1 className={styles.title}>已登录</h1>
-        <p className={styles.body}>
-          以 <span className={styles.email}>{signedInEmail}</span> 身份登录。
-          回到主页即可编辑历年记录（编辑界面将在下一阶段上线）。
-        </p>
-        <div className={styles.actions}>
-          <Link to="/" className={styles.link}>
-            ← 回到主页
-          </Link>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={async () => {
-              await signOut();
-            }}
-          >
-            退出登录
-          </button>
-        </div>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   async function onSubmit(e: FormEvent) {
@@ -70,7 +49,7 @@ export default function LoginPage() {
       {status === 'sent' ? (
         <div className={styles.success}>
           已发送 Magic Link 到 <span className={styles.email}>{email}</span>。
-          请到邮箱查收并点击链接完成登录，登录成功会回到此页。
+          请到邮箱查收并点击链接，登录成功后会自动回到主页。
         </div>
       ) : (
         <form onSubmit={onSubmit} className={styles.form}>
