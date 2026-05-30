@@ -1,18 +1,26 @@
 {
-  "name": "life-points-of-99",
+  "name": "@life99/web",
   "private": true,
   "version": "0.0.0",
-  "description": "人生 · 99 — 用 99 个光点串起的一生时间轴",
-  "packageManager": "pnpm@9.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @life99/web dev",
-    "build": "pnpm --filter @life99/web build",
-    "preview": "pnpm --filter @life99/web preview",
-    "typecheck": "pnpm --filter @life99/web typecheck",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write ."
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4"
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
   }
 }

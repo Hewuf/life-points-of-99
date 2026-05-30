@@ -25,6 +25,10 @@
   /* future 点 */
   --future-dot: #5d6c93;
 
+  /* 河流身后的环境光晕：用于把 river+dots 与背景分层 */
+  --ambient-warm: rgba(247, 184, 110, 0.12);
+  --ambient-cool: rgba(110, 130, 180, 0.08);
+
   /* 卡片 / 浮层 */
   --surface-1: rgba(20, 26, 48, 0.78);
   --surface-2: rgba(28, 35, 60, 0.92);
@@ -53,6 +57,9 @@
   --firefly-glow: #f3ad42;
 
   --future-dot: #a9b1cb;
+
+  --ambient-warm: rgba(223, 142, 44, 0.16);
+  --ambient-cool: rgba(92, 112, 162, 0.10);
 
   --surface-1: rgba(255, 251, 244, 0.82);
   --surface-2: rgba(255, 251, 244, 0.95);

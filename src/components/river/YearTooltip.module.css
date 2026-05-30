@@ -1,0 +1,81 @@
+.tooltip {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  transform: translate(-50%, calc(-100% - 14px));
+  pointer-events: none;
+
+  min-width: 160px;
+  max-width: 240px;
+  padding: 12px 14px;
+
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  color: var(--text-primary);
+  animation: tip-in 0.18s ease-out;
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 8px)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 14px)) scale(1);
+  }
+}
+
+.year {
+  font-family: var(--font-serif-num);
+  font-size: 21px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.sub {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 5px 0 9px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.badge {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.badge_past {
+  background: var(--river-lived-from);
+}
+.badge_present {
+  background: var(--firefly-core);
+  box-shadow: 0 0 6px var(--firefly-glow);
+}
+.badge_future {
+  background: var(--future-dot);
+}
+
+.dot {
+  opacity: 0.6;
+}
+
+.summary {
+  font-family: var(--font-serif-zh);
+  font-size: 13.5px;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
