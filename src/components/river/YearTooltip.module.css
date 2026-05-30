@@ -1,53 +1,77 @@
 .tooltip {
   position: absolute;
   z-index: var(--z-tooltip);
-  /* x/y 由 inline style 提供（SVG 坐标），这里只控制气泡形态 */
   transform: translate(-50%, calc(-100% - 14px));
   pointer-events: none;
 
-  min-width: 180px;
-  max-width: 260px;
-  padding: var(--space-3) var(--space-4);
+  min-width: 160px;
+  max-width: 240px;
+  padding: 12px 14px;
 
   background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
-  font-size: 13px;
-  line-height: 1.55;
   color: var(--text-primary);
+  animation: tip-in 0.18s ease-out;
 }
 
-.tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--surface-2);
-}
-
-.meta {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
-  color: var(--text-secondary);
-  font-size: 12px;
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 8px)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 14px)) scale(1);
+  }
 }
 
 .year {
   font-family: var(--font-serif-num);
-  font-size: 16px;
+  font-size: 21px;
+  line-height: 1;
   color: var(--text-primary);
-  font-weight: 600;
 }
 
-.title {
+.sub {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 5px 0 9px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.badge {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.badge_past {
+  background: var(--river-lived-from);
+}
+.badge_present {
+  background: var(--firefly-core);
+  box-shadow: 0 0 6px var(--firefly-glow);
+}
+.badge_future {
+  background: var(--future-dot);
+}
+
+.dot {
+  opacity: 0.6;
+}
+
+.summary {
   font-family: var(--font-serif-zh);
-  font-size: 14px;
+  font-size: 13.5px;
+  font-weight: 300;
+  line-height: 1.55;
   color: var(--text-primary);
 }
 

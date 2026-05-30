@@ -6,31 +6,32 @@ interface Props {
   age: number;
   state: LifeState;
   entry: YearEntry | null;
-  /** 容器坐标系下的位置（与 SVG 坐标 1:1） */
+  /** 容器坐标系下的位置（已乘以 SVG-to-px 缩放） */
   x: number;
   y: number;
 }
 
 const STATE_LABEL: Record<LifeState, string> = {
   past: '已度过',
-  present: '当下',
-  future: '未来',
+  present: '正在进行',
+  future: '尚未抵达',
 };
 
 export default function YearTooltip({ year, age, state, entry, x, y }: Props) {
+  const placeholder = state === 'present' ? '正在写的这一年，还没有结局。' : '这一年还没有故事。';
   return (
     <div className={styles.tooltip} style={{ left: x, top: y }} role="status">
-      <div className={styles.meta}>
-        <span className={`${styles.year} numerals`}>{year}</span>
+      <div className={`${styles.year} numerals`}>{year}</div>
+      <div className={styles.sub}>
+        <span className={`${styles.badge} ${styles[`badge_${state}`]}`} aria-hidden="true" />
         <span className="numerals">{age} 岁</span>
-        <span>· {STATE_LABEL[state]}</span>
+        <span className={styles.dot}>·</span>
+        <span>{STATE_LABEL[state]}</span>
       </div>
       {entry?.title ? (
-        <div className={styles.title}>{entry.title}</div>
+        <p className={styles.summary}>{entry.title}</p>
       ) : (
-        <div className={`${styles.title} ${styles.placeholder}`}>
-          {state === 'present' ? '正在发生' : '还没有记录'}
-        </div>
+        <p className={`${styles.summary} ${styles.placeholder}`}>{placeholder}</p>
       )}
     </div>
   );
