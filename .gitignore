@@ -20,3 +20,6 @@ build/
 
 # OS
 Thumbs.db
+
+# Supabase 本地 seed（含作者个人信息）
+supabase/*
