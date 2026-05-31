@@ -1,18 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { YearEntry } from '../types/year';
 
 /**
  * 拉取所有 year_entries（V1 单作者，量极小，一次性全拉即可）。
  * Supabase 未配置时返回空数组，主页将全部年呈现为"未填"。
+ *
+ * refresh()：保存后强制重拉，避免编辑完返回 UI 还是旧值。
  */
 export function useYearEntries(): {
   entries: YearEntry[];
   byYear: Map<number, YearEntry>;
   loading: boolean;
+  refresh: () => void;
 } {
   const [entries, setEntries] = useState<YearEntry[]>([]);
   const [loading, setLoading] = useState(supabase !== null);
+  const [tick, setTick] = useState(0);
+  const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
     if (!supabase) return;
@@ -35,7 +40,7 @@ export function useYearEntries(): {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tick]);
 
   const byYear = useMemo(() => {
     const m = new Map<number, YearEntry>();
@@ -43,10 +48,14 @@ export function useYearEntries(): {
     return m;
   }, [entries]);
 
-  return { entries, byYear, loading };
+  return { entries, byYear, loading, refresh };
 }
 
-export function useYearEntry(year: number): { entry: YearEntry | null; loading: boolean } {
-  const { byYear, loading } = useYearEntries();
-  return { entry: byYear.get(year) ?? null, loading };
+export function useYearEntry(year: number): {
+  entry: YearEntry | null;
+  loading: boolean;
+  refresh: () => void;
+} {
+  const { byYear, loading, refresh } = useYearEntries();
+  return { entry: byYear.get(year) ?? null, loading, refresh };
 }

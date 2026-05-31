@@ -6,7 +6,7 @@ import styles from './LoginPage.module.css';
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 export default function LoginPage() {
-  const { session, loading } = useAuth();
+  const { session, loading, authError } = useAuth();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -19,10 +19,13 @@ export default function LoginPage() {
     );
   }
 
-  // 已登录直接回主页；Magic Link 回跳后 onAuthStateChange 触发 session，下次渲染落到这里
+  // 已登录直接回主页；非白名单邮箱已被 useAuth 强制下线，这里 session 一定是 null
   if (session) {
     return <Navigate to="/" replace />;
   }
+
+  // 非作者邮箱的 Magic Link 回跳：useAuth signOut 后把消息抬到这里
+  const banner = authError ?? errorMsg;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -73,13 +76,12 @@ export default function LoginPage() {
           >
             {status === 'sending' ? '发送中…' : '发送 Magic Link'}
           </button>
-          {errorMsg && <div className={styles.error}>{errorMsg}</div>}
+          {banner && <div className={styles.error}>{banner}</div>}
         </form>
       )}
 
       <p className={styles.muted}>
-        非作者邮箱也可发送——Magic Link 只是邮箱所有权验证，
-        登录后写操作仍由数据库 RLS 拦截。
+        仅白名单邮箱可登录；其它邮箱即便点了链接也会被立即下线。
       </p>
 
       {status !== 'sent' && (

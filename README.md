@@ -2,13 +2,12 @@
 
 用 99 个光点串起的一生时间轴。一条蜿蜒向上流动的河承载 99 个里程碑，过去的河面发光，未来的河面向页面顶部收束、消失在地平线外；当下那一年以萤火虫呼吸感的光点呈现，提醒"还在发生"。
 
-详细需求与技术方案见 `life-99-requirements.md`。
+<!-- 详细需求与技术方案见 `life-99-requirements.md`。 -->
 
 ## 仓库结构
 
-```
-apps/web/               # 前端（Vite + React + TypeScript）
-  src/
+```      
+  src/                  # 前端（Vite + React + TypeScript）
     pages/              # 路由页面
     components/         # 河流 / 主题 / 浮卡 等
     lib/                # 河流几何、情绪色等纯函数
